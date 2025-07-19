@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Aora",
+    "slug": "aora",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "assets/images/profile.png",
+    "scheme": "aora",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "assets/1.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.aditya210399.aora"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c58735db-ee7a-4528-9698-adb4b4a93155"
+      }
+    }
+  }
+}
