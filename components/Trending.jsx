@@ -1,104 +1,113 @@
-import { useState } from "react";
-import { ResizeMode, Video } from "expo-av";
-import * as Animatable from "react-native-animatable";
+// Trending.jsx
+import React, { useState, useEffect, useRef } from 'react';
 import {
   FlatList,
-  Image,
-  ImageBackground,
-  TouchableOpacity,
-} from "react-native";
+  View,
+  Text,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
+import * as Animatable from 'react-native-animatable';
+import ArticleCard from './ArticleCard';
+import Paginations from './Paginations';
+import BreakingNewsCard from './BreakingNewsCard';
 
-import { icons } from "../constants";
+const SPACING = 0;
+const CARD_WIDTH_FACTOR = 0.7;
 
-const zoomIn = {
-  0: {
-    scale: 0.9,
-  },
-  1: {
-    scale: 1,
-  },
-};
+const zoomIn = { 0: { scale: 0.9 }, 1: { scale: 1 } };
+const zoomOut = { 0: { scale: 1 }, 1: { scale: 0.9 } };
 
-const zoomOut = {
-  0: {
-    scale: 1,
-  },
-  1: {
-    scale: 0.9,
-  },
-};
+const TrendingItem = ({ item, isActive, cardWidth }) => (
+  <Animatable.View
+    style={[styles.cardContainer, { width: cardWidth }]}
+    animation={isActive ? zoomIn : zoomOut}
+    duration={500}
+  >
+    <BreakingNewsCard item={item} />
+  </Animatable.View>
+);
 
-const TrendingItem = ({ activeItem, item }) => {
-  const [play, setPlay] = useState(false);
+const Trending = ({ posts = [] }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const { width } = useWindowDimensions();
 
-  return (
-    <Animatable.View
-      className="mr-5"
-      animation={activeItem === item.$id ? zoomIn : zoomOut}
-      duration={500}
-    >
-      {play ? (
-        <Video
-          source={{ uri: item.video }}
-          className="w-52 h-72 rounded-[33px] mt-3 bg-white/10"
-          resizeMode={ResizeMode.CONTAIN}
-          useNativeControls
-          shouldPlay
-          onPlaybackStatusUpdate={(status) => {
-            if (status.didJustFinish) {
-              setPlay(false);
-            }
-          }}
-        />
-      ) : (
-        <TouchableOpacity
-          className="relative flex justify-center items-center"
-          activeOpacity={0.7}
-          onPress={() => setPlay(true)}
-        >
-          <ImageBackground
-            source={{
-              uri: item.thumbnail,
-            }}
-            className="w-52 h-72 rounded-[33px] my-5 overflow-hidden shadow-lg shadow-black/40"
-            resizeMode="cover"
-          />
+  const CARD_WIDTH = width * CARD_WIDTH_FACTOR;
+  const flatListRef = useRef(null);
 
-          <Image
-            source={icons.play}
-            className="w-12 h-12 absolute"
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-      )}
-    </Animatable.View>
-  );
-};
+  // autoplay every 3s
+  useEffect(() => {
+    const id = setInterval(() => {
+      const next = activeIndex + 1 >= posts.length ? 0 : activeIndex + 1;
+      flatListRef.current?.scrollToOffset({
+        offset: next * (CARD_WIDTH + SPACING),
+        animated: true,
+      });
+      setActiveIndex(next);
+    }, 3000);
+    return () => clearInterval(id);
+  }, [activeIndex, posts.length, CARD_WIDTH]);
 
-const Trending = ({ posts }) => {
-  const [activeItem, setActiveItem] = useState(posts[0]);
-
-  const viewableItemsChanged = ({ viewableItems }) => {
+  // track which item is visible for pagination & zoom
+  const viewConfig = { itemVisiblePercentThreshold: 50 };
+  const onViewableItemsChanged = useRef(({ viewableItems }) => {
     if (viewableItems.length > 0) {
-      setActiveItem(viewableItems[0].key);
+      setActiveIndex(viewableItems[0].index);
     }
-  };
+  }).current;
 
   return (
-    <FlatList
-      data={posts}
-      horizontal
-      keyExtractor={(item) => item.$id}
-      renderItem={({ item }) => (
-        <TrendingItem activeItem={activeItem} item={item} />
-      )}
-      onViewableItemsChanged={viewableItemsChanged}
-      viewabilityConfig={{
-        itemVisiblePercentThreshold: 70,
-      }}
-      contentOffset={{ x: 170 }}
-    />
+    <View className="-mx-4 mb-10">
+      {/* <Text style={styles.title}>Trending</Text> */}
+      <FlatList
+        ref={flatListRef}
+        data={posts}
+        keyExtractor={(item, index) => `${item.$id}-${index}`}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={CARD_WIDTH + SPACING}
+        decelerationRate="fast"
+        contentContainerStyle={{
+          paddingHorizontal: (width - CARD_WIDTH) / 2,
+        }}
+        onScrollBeginDrag={() => clearInterval()}   // stop auto on drag if you like
+        onScrollEndDrag={() => {}}                  // resume auto if you like
+        viewabilityConfig={viewConfig}
+        onViewableItemsChanged={onViewableItemsChanged}
+        renderItem={({ item, index }) => (
+          <TrendingItem
+            item={item}
+            cardWidth={CARD_WIDTH}
+            isActive={index === activeIndex}
+          />
+        )}
+      />
+      <Paginations items={posts} paginationsIndex={activeIndex} />
+    </View>
   );
 };
 
 export default Trending;
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 10,
+    marginLeft: 20,
+  },
+  cardContainer: {
+    marginRight: SPACING,
+    height: 300,
+    borderRadius: 33,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+  },
+});

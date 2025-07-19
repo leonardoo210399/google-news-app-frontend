@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+// screens/Home.jsx (updated to use ArticleCard)
+import React, { useState } from "react";
 import {
   View,
   Text,
   FlatList,
   Image,
-  TouchableOpacity,
-  Alert,
   RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,18 +12,16 @@ import { images } from "../../constants";
 import SearchInput from "../../components/SearchInput";
 import Trending from "../../components/Trending";
 import EmptyState from "../../components/EmptyState";
-import { getAllPosts, getLatestPosts } from "../../lib/appwrite";
+import { fetchLatestArticles, fetchEditorsPick } from "../../lib/appwrite";
 import useAppwrite from "../../lib/useAppwrite";
-import VideoCard from "../../components/VideoCard";
+import ArticleCard from "../../components/ArticleCard";
 import { useGlobalContext } from "../../context/GlobalProvider";
 
-
 const Home = () => {
-  const { user, setUser, setIsLogged } = useGlobalContext();
+  const { user } = useGlobalContext();
 
-  const { data: posts, refetch } = useAppwrite(getAllPosts);
-  const { data: latestPosts} = useAppwrite(getLatestPosts);
-
+  const { data: posts, refetch } = useAppwrite(fetchLatestArticles);
+  const { data: latestPosts } = useAppwrite(fetchEditorsPick);
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
@@ -33,20 +30,15 @@ const Home = () => {
     setRefreshing(false);
   };
 
-  // console.log(posts);
-  
-
   return (
-    <SafeAreaView className="bg-primary h-full">
+    <SafeAreaView className="bg-primary flex-1">
       <FlatList
         data={posts}
         keyExtractor={(item) => item.$id}
-        renderItem={({ item }) => (
-          <VideoCard video={item}/>
-        )}
+        renderItem={({ item }) => <ArticleCard item={item} />}
         ListHeaderComponent={() => (
-          <View className="flex my-6 px-4 space-y-6">
-            <View className="flex justify-between items-start flex-row mb-6">
+          <View className="my-6 px-4 space-y-1">
+            <View className="flex-row justify-between items-start mb-6">
               <View>
                 <Text className="font-pmedium text-sm text-gray-100">
                   Welcome Back,
@@ -55,33 +47,31 @@ const Home = () => {
                   {user?.username}
                 </Text>
               </View>
-
-              <View className="mt-1.5">
-                <Image
-                  source={images.logoSmall}
-                  className="w-9 h-10"
-                  resizeMode="contain"
-                />
-              </View>
+              <Image
+                source={images.logoSmall}
+                className="w-9 h-10 mt-1.5"
+                resizeMode="contain"
+              />
             </View>
 
-            <SearchInput />
-
-            <View className="w-full flex-1 pt-5 pb-8">
+            <View className="">
               <Text className="text-lg font-pregular text-gray-100 mb-3">
-                Latest Videos
+                Editor's Choice
               </Text>
-
-              <Trending
-                posts={latestPosts ?? []}
-              />
+              <Trending posts={latestPosts ?? []} />
+            </View>
+            {/* NEW: Latest Articles Heading */}
+            <View>
+              <Text className="text-lg font-psemibold text-white">
+                Latest Articles
+              </Text>
             </View>
           </View>
         )}
         ListEmptyComponent={() => (
           <EmptyState
-            title="No Videos Found"
-            subtitle="Be a first one to upload a video."
+            title="No Articles Found"
+            subtitle="Be the first one to upload an article."
           />
         )}
         refreshControl={
@@ -92,6 +82,4 @@ const Home = () => {
   );
 };
 
-
 export default Home;
-

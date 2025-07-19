@@ -1,64 +1,46 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  Image,
-  TouchableOpacity,
-  Alert,
-  RefreshControl,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { images } from "../../constants";
-import SearchInput from "../../components/SearchInput";
-import Trending from "../../components/Trending";
-import EmptyState from "../../components/EmptyState";
-import { getAllPosts, getLatestPosts, searchPosts } from "../../lib/appwrite";
-import useAppwrite from "../../lib/useAppwrite";
-import VideoCard from "../../components/VideoCard";
-import { useLocalSearchParams } from "expo-router";
+// client/app/search/[query].jsx
 
-const Search = () => {
-  const { query } = useLocalSearchParams();
-  const { data: posts, refetch } = useAppwrite(() => searchPosts(query));
+import React from "react";
+import { SafeAreaView, View, TouchableOpacity, Text } from "react-native";
+import { WebView } from "react-native-webview";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
-  useEffect(() => {
-    refetch();
-  }, [query]);
+export default function ArticleWebView() {
+  const router = useRouter();
+  const { url, title } = useLocalSearchParams();
 
-  // console.log(query,posts);
+  const decodedUrl = decodeURIComponent(url);
+  const decodedTitle = decodeURIComponent(title);
 
   return (
-    <SafeAreaView className="bg-primary h-full">
-      <FlatList
-        data={posts}
-        keyExtractor={(item) => item.$id}
-        renderItem={({ item }) => <VideoCard video={item} />}
-        ListHeaderComponent={() => (
-          <>
-            <View className="flex my-6 px-4">
-              <Text className="font-pmedium text-gray-100 text-sm">
-                Search Results
-              </Text>
-              <Text className="text-2xl font-psemibold text-white mt-1">
-                {query}
-              </Text>
+    <SafeAreaView className="pt-8 bg-primary flex-1">
+      {/* Header */}
+      <View className="flex-row items-center h-14 px-4 bg-primary border-b border-black-200">
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="#CDCDE0" />
+        </TouchableOpacity>
+        <Text
+          className="text-white text-lg font-psemibold ml-4 flex-1"
+          numberOfLines={1}
+        >
+          {decodedTitle}
+        </Text>
+      </View>
 
-              <View className="mt-6 mb-8">
-                <SearchInput initialQuery={query} />
-              </View>
+      {/* WebView */}
+      <View className="flex-1">
+        <WebView
+          source={{ uri: decodedUrl }}
+          startInLoadingState
+          style={{ flex: 1, backgroundColor: "#000" }}
+          renderLoading={() => (
+            <View className="absolute inset-0 bg-black-100 bg-opacity-50 justify-center items-center">
+              <Ionicons name="refresh" size={32} color="#CDCDE0" />
             </View>
-          </>
-        )}
-        ListEmptyComponent={() => (
-          <EmptyState
-            title="No Videos Found"
-            subtitle="No videos founf for this search query"
-          />
-        )}
-      />
+          )}
+        />
+      </View>
     </SafeAreaView>
   );
-};
-
-export default Search;
+}

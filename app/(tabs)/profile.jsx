@@ -15,6 +15,7 @@ import Trending from "../../components/Trending";
 import EmptyState from "../../components/EmptyState";
 import InfoBox from "../../components/InfoBox";
 import {
+  fetchLatestArticles,
   getAllPosts,
   getLatestPosts,
   getUserPosts,
@@ -25,10 +26,11 @@ import useAppwrite from "../../lib/useAppwrite";
 import VideoCard from "../../components/VideoCard";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { router } from "expo-router";
+import ArticleCard from "@/components/ArticleCard";
 
 const Profile = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
-  const { data: posts } = useAppwrite(() => getUserPosts(user.$id));
+  const { data: posts } = useAppwrite(() => fetchLatestArticles());
 
   const logout = async () => {
     await signOut();
@@ -39,9 +41,9 @@ const Profile = () => {
   return (
     <SafeAreaView className="bg-primary h-full">
       <FlatList
-        data={posts}
+        data={null}
         keyExtractor={(item) => item.$id}
-        renderItem={({ item }) => <VideoCard video={item} />}
+        renderItem={({ item }) => <ArticleCard item={item} />}
         ListHeaderComponent={() => (
           <>
             <View className="w-full flex justify-center items-center mt-6 mb-12 px-4">
@@ -75,8 +77,8 @@ const Profile = () => {
                 containerStyles="mr-10"
               />
               <InfoBox
-                title="1.2k"
-                subtitle="Followers"
+                title={user.articlesBookmarked?.length}
+                subtitle="Bookmarks"
                 titleStyles="text-xl"
               />
             </View>

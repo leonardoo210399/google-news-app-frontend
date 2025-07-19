@@ -20,7 +20,7 @@
         "foregroundImage": "assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.aditya210399.aora"
+      "package": "com.crypto.news"
     },
     "web": {
       "bundler": "metro",
@@ -35,7 +35,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "c58735db-ee7a-4528-9698-adb4b4a93155"
+        "projectId": "4b5ba09f-c3f2-43f2-af93-479360c4a2e6"
       }
     }
   }
