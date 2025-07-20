@@ -1,7 +1,7 @@
 // client/app/search/[query].jsx
 
 import React from "react";
-import { SafeAreaView, View, TouchableOpacity, Text } from "react-native";
+import { SafeAreaView, View, TouchableOpacity, Text, ActivityIndicator } from "react-native";
 import { WebView } from "react-native-webview";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,8 +35,20 @@ export default function ArticleWebView() {
           startInLoadingState
           style={{ flex: 1, backgroundColor: "#000" }}
           renderLoading={() => (
-            <View className="absolute inset-0 bg-black-100 bg-opacity-50 justify-center items-center">
-              <Ionicons name="refresh" size={32} color="#CDCDE0" />
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: "rgba(16,16,16,0.5)", // adjust as needed
+                justifyContent: "center",
+                alignItems: "center",
+                zIndex: 10,
+              }}
+            >
+              <ActivityIndicator size={"large"} color="#FF9C01" />
             </View>
           )}
         />

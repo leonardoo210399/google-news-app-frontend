@@ -29,7 +29,7 @@ const Bookmark = () => {
   };
 
   const bookmarked = Array.isArray(user?.articlesBookmarked)
-    ? user.articlesBookmarked
+    ? [...user.articlesBookmarked].reverse()
     : [];
 
   return (

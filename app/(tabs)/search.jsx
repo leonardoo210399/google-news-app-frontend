@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import Trending from "../../components/Trending";
 import EmptyState from "../../components/EmptyState";
 import ArticleCard from "../../components/ArticleCard";
 
